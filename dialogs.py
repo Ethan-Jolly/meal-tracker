@@ -8,10 +8,10 @@ from datetime import datetime
 def new_meal_dialog():
     meal_name = st.text_input("What is the name of the meal?")
     description = st.text_input("Description")
+    added_by = st.text_input("Added By")
 
-    st.dataframe(st.session_state['meal_df'])
 
-    if not meal_name:
+    if not meal_name or not added_by:
         st.info('Please enter a meal name before adding to list')
     else:
         add = st.button("Add New Meal")
@@ -20,10 +20,11 @@ def new_meal_dialog():
             df = pd.concat([st.session_state['meal_df'], pd.DataFrame([{'meal_id':id, 
                                             'meal_name':meal_name,
                                             'description':description,
-                                            'updated_by':st.session_state['user'],
+                                            'updated_by':added_by,
                                             'updated_at':datetime.now()}])], ignore_index=True)
             st.session_state['meal_df'] = df
             st.markdown('**Current List**')
+            st.dataframe(st.session_state['meal_df'][['meal_name','description']].rename({'meal_name':'Meal Name','description':'Description'}), hide_index=True,use_container_width=True)
     
     upload = st.button("Upload",
                 disabled=st.session_state['meal_df'].empty,

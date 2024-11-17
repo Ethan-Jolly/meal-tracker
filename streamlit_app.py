@@ -17,9 +17,6 @@ st.set_page_config(
 )
 
 headers = st.context.headers
-st.markdown(dict(headers))
-
-st.session_state['user'] = 'dev'
 
 # -----------------------------------------------------------------------------
 
