@@ -41,7 +41,7 @@ def initialize_data(conn):
         CREATE TABLE IF NOT EXISTS ingredients (
             ingredient_id TEXT PRIMARY KEY,
             meal_id TEXT,
-            ingredient_name,
+            ingredient_name TEXT,
             quantity REAL,
             unit TEXT,
             updated_by TEXT,
@@ -85,14 +85,15 @@ def run_sql_query(query):
         print(f"Error loading meals: {e}")
         return None  
 
-def load_meals(conn):
-    """Loads the inventory data from the database."""
+
+def load_table(table_name):
+    """Loads the data from the database."""
     conn, db_was_just_created = connect_db()
     cursor = conn.cursor()
 
     try:
         # Execute the query
-        cursor.execute("SELECT * FROM meals;")
+        cursor.execute(f"SELECT * FROM {table_name};")
         data = cursor.fetchall()
 
         # Get column names from cursor.description
@@ -107,9 +108,24 @@ def load_meals(conn):
 
     return df
 
+def insert_week(week_id, start_date, chosen_meal_id):
+    conn, db_was_just_created = connect_db()
+
+    cursor = conn.cursor()
+
+    cursor.execute(
+        f"""
+        INSERT INTO weeks
+            (week_id, start_date, meal_id)
+        VALUES
+            ('{week_id}', '{start_date}', '{chosen_meal_id}');
+        """
+    )
+    conn.commit()
+    conn.close()
+
 def insert_meals(df):
     conn, db_was_just_created = connect_db()
-    
 
     cursor = conn.cursor()
 
