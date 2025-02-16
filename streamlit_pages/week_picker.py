@@ -52,7 +52,7 @@ for index, meal in df_meals.iterrows():
                 st.info('No ingredients found for this meal', icon=':material/info:')
             else:
                 st.dataframe(df_ingredients)
-        remove = cols[1].button(':material/delete:', use_container_width=True)
+        remove = cols[1].button(':material/delete:', use_container_width=True, key=f'remove_{meal["meal_id"]}')
         if remove:
             dba.delete_week(start_of_week, meal['meal_id'])
             st.rerun()
