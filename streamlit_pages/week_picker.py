@@ -2,6 +2,7 @@ import streamlit as st
 from datetime import datetime, timedelta, date
 import db_access as dba
 import pandas as pd
+import utils
 
 st.title('Week Picker')
 
@@ -19,34 +20,19 @@ weekday = today.weekday()
 # Calculate the start of the week (Monday)
 start_of_week = (today - timedelta(days=weekday)).date()
 
-def get_next_five_weeks():
-    # Get today's date
-    today = datetime.now()
-    
-    # Find the next Monday
-    days_until_monday = (7 - today.weekday()) % 7
-    next_monday = today + timedelta(days=days_until_monday)
-    
-    # Generate list of 5 Mondays
-    monday_dates = [
-        (next_monday + timedelta(weeks=i)).strftime('%Y-%m-%d')
-        for i in range(5)
-    ]
-    
-    return monday_dates
+df_weeks = dba.run_sql_query('''select * from weeks 
+            where meal_id in (select distinct meal_id from meals);''')
 
 
-weeks = get_next_five_weeks()
+
+weeks = utils.get_weeks_list(df_weeks)
 
 chosen_week = st.selectbox('Select a week', weeks)
 
-st.subheader(f'Current Week')
-st.markdown(f'##### {chosen_week}')
+
 start_of_week = chosen_week
 
-df = dba.load_table('weeks')
-
-current_df = df[df['start_date'] == start_of_week]
+current_df = df_weeks[df_weeks['start_date'] == start_of_week]
 
 df_meals = dba.load_table('meals')
 
@@ -58,8 +44,14 @@ for index, meal in df_meals.iterrows():
                     {meal['meal_name']}
                     </div>''', unsafe_allow_html=True)
         cols = st.columns([6,2])
-        with cols[0].expander('View Description'):
-            st.write(meal['description'])
+        with cols[0].expander('View Ingredients'):
+            df_ingredients = dba.run_sql_query(f'''select * from ingredients 
+                                                where meal_id == '{meal['meal_id']}' ''')
+            df_ingredients = df_ingredients[['ingredient_name', 'quantity', 'unit']].rename(columns={'ingredient_name': 'Ingredient', 'quantity': 'Quantity', 'unit': 'Unit'})
+            if df_ingredients.empty:
+                st.info('No ingredients found for this meal', icon=':material/info:')
+            else:
+                st.dataframe(df_ingredients)
         remove = cols[1].button(':material/delete:', use_container_width=True)
         if remove:
             dba.delete_week(start_of_week, meal['meal_id'])
