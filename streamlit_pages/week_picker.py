@@ -19,9 +19,30 @@ weekday = today.weekday()
 # Calculate the start of the week (Monday)
 start_of_week = (today - timedelta(days=weekday)).date()
 
+def get_next_five_weeks():
+    # Get today's date
+    today = datetime.now()
+    
+    # Find the next Monday
+    days_until_monday = (7 - today.weekday()) % 7
+    next_monday = today + timedelta(days=days_until_monday)
+    
+    # Generate list of 5 Mondays
+    monday_dates = [
+        (next_monday + timedelta(weeks=i)).strftime('%Y-%m-%d')
+        for i in range(5)
+    ]
+    
+    return monday_dates
+
+
+weeks = get_next_five_weeks()
+
+chosen_week = st.selectbox('Select a week', weeks)
 
 st.subheader(f'Current Week')
-st.markdown(f'##### {start_of_week}')
+st.markdown(f'##### {chosen_week}')
+start_of_week = chosen_week
 
 df = dba.load_table('weeks')
 df['start_date'] = pd.to_datetime(df['start_date']).dt.date

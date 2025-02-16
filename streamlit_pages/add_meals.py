@@ -21,12 +21,23 @@ if df.empty:
     st.info('Start by adding a meal below', icon=':material/info:')
 else:
     for index, meal in df.iterrows():
-        with st.container(border=True):
-            st.markdown(f'''<div style="text-align: center; font-size: 24px; font-weight: bold; margin-top: 20px; margin-bottom: 20px;">
+        meal_name = f'''<div style="text-align: center; font-size: 24px; font-weight: bold; margin-top: 20px; margin-bottom: 20px;">
                         {meal['meal_name']}
-                        </div>''', unsafe_allow_html=True)
-            with st.expander('View Description'):
+                        </div>'''
+        with st.popover(meal['meal_name'], use_container_width=True):
+
+            if meal['description']:
                 st.write(meal['description'])
+
+            with st.expander('View Ingredients'):
+                df_ingredients = dba.run_sql_query(f'''SELECT ingredient_id, ingredient_name, quantity, unit, MAX(updated_at) FROM ingredients
+                                                    WHERE meal_id == '{meal['meal_id']}'
+                                                    GROUP BY ingredient_name;''')
+                if not df_ingredients.empty:
+                    df_ingredients = df_ingredients[['ingredient_name','quantity','unit']].rename(columns={'ingredient_name':'Ingredient','quantity':'Amount','unit':'Unit'})
+                    st.dataframe(df_ingredients, hide_index=True, use_container_width=True)
+                else:
+                    pass
 
 # st.dataframe(df, hide_index=True, use_container_width=True)
 

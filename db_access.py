@@ -159,6 +159,26 @@ def delete_meal(meal_id):
     conn.commit()
     conn.close()
 
+def insert_ingredients(df):
+    conn, db_was_just_created = connect_db()
+
+    cursor = conn.cursor()
+
+    df["updated_at"] = pd.to_datetime(df["updated_at"]).dt.strftime("%Y-%m-%d %H:%M:%S")
+    rows = df.to_dict(orient="records")
+
+    cursor.executemany(
+        """
+        INSERT INTO ingredients
+            (ingredient_id, meal_id, ingredient_name, quantity, unit, updated_by, updated_at)
+        VALUES
+            (:ingredient_id, :meal_id, :ingredient_name, :quantity, :unit, :updated_by, :updated_at)
+        """,
+        rows,
+    )
+
+    conn.commit()
+    conn.close()
 
 def update_data(conn, df, changes):
     """Updates the inventory data in the database."""
