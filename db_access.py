@@ -159,6 +159,15 @@ def delete_meal(meal_id):
     conn.commit()
     conn.close()
 
+def delete_week(start_of_week, meal_id):
+    conn, db_was_just_created = connect_db()
+
+    cursor = conn.cursor()
+
+    cursor.execute(f"DELETE FROM weeks WHERE start_date == '{start_of_week}' AND meal_id == '{meal_id}'")
+    conn.commit()
+    conn.close()
+
 def insert_ingredients(df):
     conn, db_was_just_created = connect_db()
 

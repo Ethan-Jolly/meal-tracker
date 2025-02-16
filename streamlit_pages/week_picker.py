@@ -45,8 +45,6 @@ st.markdown(f'##### {chosen_week}')
 start_of_week = chosen_week
 
 df = dba.load_table('weeks')
-df['start_date'] = pd.to_datetime(df['start_date']).dt.date
-
 
 current_df = df[df['start_date'] == start_of_week]
 
@@ -59,8 +57,14 @@ for index, meal in df_meals.iterrows():
         st.markdown(f'''<div style="text-align: center; font-size: 24px; font-weight: bold; margin-top: 20px; margin-bottom: 20px;">
                     {meal['meal_name']}
                     </div>''', unsafe_allow_html=True)
-        with st.expander('View Description'):
+        cols = st.columns([6,2])
+        with cols[0].expander('View Description'):
             st.write(meal['description'])
+        remove = cols[1].button(':material/delete:', use_container_width=True)
+        if remove:
+            dba.delete_week(start_of_week, meal['meal_id'])
+            st.rerun()
+
 
 
 
